@@ -1,5 +1,6 @@
 package com.test.product.controller;
 
+import com.test.product.dto.ApiResponse;
 import com.test.product.dto.CategoryPriceStatProjection;
 import com.test.product.dto.ProductRequest;
 import com.test.product.dto.ProductResponse;
@@ -32,12 +33,14 @@ public class ProductController {
     }
 
     @PostMapping
-    public ResponseEntity<ProductResponse> create(@RequestBody ProductRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(productService.create(request));
+    public ResponseEntity<ApiResponse<ProductResponse>> create(@RequestBody ProductRequest request) {
+        ProductResponse created = productService.create(request);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success("Product created successfully", created));
     }
 
     @GetMapping
-    public ResponseEntity<List<ProductResponse>> findAll(
+    public ResponseEntity<ApiResponse<List<ProductResponse>>> findAll(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) BigDecimal minPrice,
@@ -45,44 +48,50 @@ public class ProductController {
             @RequestParam(required = false) Boolean inStockOnly,
             @RequestParam(required = false) String sortBy
     ) {
-        return ResponseEntity.ok(productService.findAll(keyword, categoryId, minPrice, maxPrice, inStockOnly, sortBy));
+        List<ProductResponse> products = productService.findAll(keyword, categoryId, minPrice, maxPrice, inStockOnly, sortBy);
+        return ResponseEntity.ok(ApiResponse.success("Products retrieved successfully", products));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProductResponse> findById(@PathVariable Long id) {
-        return ResponseEntity.ok(productService.findById(id));
+    public ResponseEntity<ApiResponse<ProductResponse>> findById(@PathVariable Long id) {
+        ProductResponse product = productService.findById(id);
+        return ResponseEntity.ok(ApiResponse.success("Product retrieved successfully", product));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ProductResponse> update(
+    public ResponseEntity<ApiResponse<ProductResponse>> update(
             @PathVariable Long id,
             @RequestBody ProductRequest request
     ) {
-        return ResponseEntity.ok(productService.update(id, request));
+        ProductResponse updated = productService.update(id, request);
+        return ResponseEntity.ok(ApiResponse.success("Product updated successfully", updated));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
         productService.delete(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(ApiResponse.success("Product deleted successfully", null));
     }
 
     @GetMapping("/stats/by-category")
-    public ResponseEntity<List<CategoryPriceStatProjection>> getCategoryStats(
+    public ResponseEntity<ApiResponse<List<CategoryPriceStatProjection>>> getCategoryStats(
             @RequestParam(defaultValue = "1") long minProductCount
     ) {
-        return ResponseEntity.ok(productService.getCategoryStats(minProductCount));
+        List<CategoryPriceStatProjection> stats = productService.getCategoryStats(minProductCount);
+        return ResponseEntity.ok(ApiResponse.success("Product category statistics retrieved successfully", stats));
     }
 
     @GetMapping("/top-expensive")
-    public ResponseEntity<List<ProductResponse>> getTopExpensivePerCategory(
+    public ResponseEntity<ApiResponse<List<ProductResponse>>> getTopExpensivePerCategory(
             @RequestParam(defaultValue = "3") int topN
     ) {
-        return ResponseEntity.ok(productService.getTopExpensivePerCategory(topN));
+        List<ProductResponse> topProducts = productService.getTopExpensivePerCategory(topN);
+        return ResponseEntity.ok(ApiResponse.success("Top expensive products retrieved successfully", topProducts));
     }
 
     @GetMapping("/summary")
-    public ResponseEntity<ProductSummaryResponse> getSummary() {
-        return ResponseEntity.ok(productService.getSummary());
+    public ResponseEntity<ApiResponse<ProductSummaryResponse>> getSummary() {
+        ProductSummaryResponse summary = productService.getSummary();
+        return ResponseEntity.ok(ApiResponse.success("Product summary retrieved successfully", summary));
     }
 }

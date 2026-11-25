@@ -1,5 +1,6 @@
 package com.test.category.controller;
 
+import com.test.category.dto.ApiResponse;
 import com.test.category.dto.CategoryRequest;
 import com.test.category.dto.CategoryResponse;
 import com.test.category.dto.CategoryStatsProjection;
@@ -31,45 +32,52 @@ public class CategoryController {
     }
 
     @PostMapping
-    public ResponseEntity<CategoryResponse> create(@RequestBody CategoryRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(categoryService.create(request));
+    public ResponseEntity<ApiResponse<CategoryResponse>> create(@RequestBody CategoryRequest request) {
+        CategoryResponse created = categoryService.create(request);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success("Category created successfully", created));
     }
 
     @GetMapping
-    public ResponseEntity<List<CategoryResponse>> findAll(
+    public ResponseEntity<ApiResponse<List<CategoryResponse>>> findAll(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) Boolean active,
             @RequestParam(required = false) String sortBy
     ) {
-        return ResponseEntity.ok(categoryService.findAll(keyword, active, sortBy));
+        List<CategoryResponse> categories = categoryService.findAll(keyword, active, sortBy);
+        return ResponseEntity.ok(ApiResponse.success("Categories retrieved successfully", categories));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CategoryResponse> findById(@PathVariable Long id) {
-        return ResponseEntity.ok(categoryService.findById(id));
+    public ResponseEntity<ApiResponse<CategoryResponse>> findById(@PathVariable Long id) {
+        CategoryResponse category = categoryService.findById(id);
+        return ResponseEntity.ok(ApiResponse.success("Category retrieved successfully", category));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CategoryResponse> update(
+    public ResponseEntity<ApiResponse<CategoryResponse>> update(
             @PathVariable Long id,
             @RequestBody CategoryRequest request
     ) {
-        return ResponseEntity.ok(categoryService.update(id, request));
+        CategoryResponse updated = categoryService.update(id, request);
+        return ResponseEntity.ok(ApiResponse.success("Category updated successfully", updated));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
         categoryService.delete(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(ApiResponse.success("Category deleted successfully", null));
     }
 
     @GetMapping("/stats")
-    public ResponseEntity<List<CategoryStatsProjection>> getStats() {
-        return ResponseEntity.ok(categoryService.getStats());
+    public ResponseEntity<ApiResponse<List<CategoryStatsProjection>>> getStats() {
+        List<CategoryStatsProjection> stats = categoryService.getStats();
+        return ResponseEntity.ok(ApiResponse.success("Category statistics retrieved successfully", stats));
     }
 
     @GetMapping("/grouped")
-    public ResponseEntity<Map<Boolean, List<CategoryResponse>>> groupByActiveStatus() {
-        return ResponseEntity.ok(categoryService.groupByActiveStatus());
+    public ResponseEntity<ApiResponse<Map<Boolean, List<CategoryResponse>>>> groupByActiveStatus() {
+        Map<Boolean, List<CategoryResponse>> grouped = categoryService.groupByActiveStatus();
+        return ResponseEntity.ok(ApiResponse.success("Grouped categories retrieved successfully", grouped));
     }
 }

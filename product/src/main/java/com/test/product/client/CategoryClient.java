@@ -1,5 +1,6 @@
 package com.test.product.client;
 
+import com.test.product.dto.ApiResponse;
 import com.test.product.dto.CategoryDto;
 import com.test.product.exception.ExternalServiceException;
 import com.test.product.exception.ResourceNotFoundException;
@@ -24,14 +25,14 @@ public class CategoryClient {
 
     public CategoryDto getCategoryById(Long categoryId) {
         try {
-            CategoryDto category = categoryRestClient.get()
+            ApiResponse<CategoryDto> response = categoryRestClient.get()
                     .uri("/api/categories/{id}", categoryId)
                     .retrieve()
-                    .body(CategoryDto.class);
-            if (category == null) {
+                    .body(new ParameterizedTypeReference<>() {});
+            if (response == null || !response.status() || response.data() == null) {
                 throw new ResourceNotFoundException("Category not found with id: " + categoryId);
             }
-            return category;
+            return response.data();
         } catch (HttpClientErrorException.NotFound ex) {
             throw new ResourceNotFoundException("Category not found with id: " + categoryId);
         } catch (RestClientException ex) {
@@ -41,11 +42,13 @@ public class CategoryClient {
 
     public List<CategoryDto> getAllCategories() {
         try {
-            List<CategoryDto> categories = categoryRestClient.get()
+            ApiResponse<List<CategoryDto>> response = categoryRestClient.get()
                     .uri("/api/categories")
                     .retrieve()
                     .body(new ParameterizedTypeReference<>() {});
-            return categories != null ? categories : Collections.emptyList();
+            return (response != null && response.data() != null)
+                    ? response.data()
+                    : Collections.emptyList();
         } catch (RestClientException ex) {
             return Collections.emptyList();
         }

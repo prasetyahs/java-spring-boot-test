@@ -127,6 +127,28 @@ Semua environment variable di `docker-compose.yml` sudah memiliki nilai default 
 
 ## List Endpoint
 
+### Format Response Standar
+
+Semua endpoint (sukses maupun error) menggunakan format response seragam:
+
+```json
+{
+  "status": true,
+  "message": "Category created successfully",
+  "data": { }
+}
+```
+
+Contoh response error:
+
+```json
+{
+  "status": false,
+  "message": "Category not found with id: 99",
+  "data": null
+}
+```
+
 ### Category Service — Base URL: `http://localhost:8081`
 
 | Method | Endpoint | Query Params | Deskripsi |
@@ -135,7 +157,7 @@ Semua environment variable di `docker-compose.yml` sudah memiliki nilai default 
 | `GET` | `/api/categories` | `keyword`, `active` (`true`/`false`), `sortBy` (`name`/`oldest`) | List & filter category (Native SQL + Java Stream) |
 | `GET` | `/api/categories/{id}` | - | Detail category berdasarkan ID |
 | `PUT` | `/api/categories/{id}` | - | Update category (Native SQL `UPDATE`) |
-| `DELETE` | `/api/categories/{id}` | - | Hapus category (Native SQL `DELETE`, `204 No Content`) |
+| `DELETE` | `/api/categories/{id}` | - | Hapus category (Native SQL `DELETE`, `200 OK`) |
 | `GET` | `/api/categories/stats` | - | Statistik jumlah category berdasarkan status `active` (Native SQL `GROUP BY`) |
 | `GET` | `/api/categories/grouped` | - | Mengelompokkan category berdasarkan status `active` (Java Stream `groupingBy`) |
 
@@ -185,7 +207,7 @@ curl -X DELETE http://localhost:8081/api/categories/1
 | `GET` | `/api/products` | `keyword`, `categoryId`, `minPrice`, `maxPrice`, `inStockOnly`, `sortBy` (`priceAsc`/`priceDesc`/`name`) | List & multi-filter product (Native SQL + Java Stream + enrich `categoryName`) |
 | `GET` | `/api/products/{id}` | - | Detail product berdasarkan ID |
 | `PUT` | `/api/products/{id}` | - | Update product (validasi `categoryId` + Native SQL `UPDATE`) |
-| `DELETE` | `/api/products/{id}` | - | Hapus product (Native SQL `DELETE`, `204 No Content`) |
+| `DELETE` | `/api/products/{id}` | - | Hapus product (Native SQL `DELETE`, `200 OK`) |
 | `GET` | `/api/products/stats/by-category` | `minProductCount` (default: `1`) | Statistik harga & stok per category (Native SQL `GROUP BY` + `HAVING`) |
 | `GET` | `/api/products/top-expensive` | `topN` (default: `3`) | Top N product termahal per category (Native SQL CTE + `DENSE_RANK()`) |
 | `GET` | `/api/products/summary` | - | Ringkasan total produk, total stok, avg/min/max price, & grouping per category (Java Stream) |
